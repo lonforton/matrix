@@ -5,7 +5,7 @@
 #include <iostream>
 #include <random>
 
-#include "matrix.h"
+#include "matr.h"
 
 BOOST_AUTO_TEST_SUITE(matrix_test_suite)
 
