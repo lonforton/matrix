@@ -1,11 +1,10 @@
 #include <iostream>
 #include <cassert>
 
-#include "matrix.h"
+#include "matr.h"
 
 int main()
 {
-
   Matrix<int, 0> matrix;
   for (int i = 0; i < 10; ++i)
   {
@@ -31,8 +30,16 @@ int main()
     std::cout << std::endl;
   }
 
-  std::cout << "Occupied cells: " << matrix.size() << std::endl;    //20. Should be 18?
+  std::cout << "Occupied cells: " << matrix.size() << std::endl;   
 
+  int x;
+  int y;
+  int v;
+  for(auto c : matrix)
+  {
+    std::tie(x, y, v) = c;
+    std::cout << x << " " << y << " " << v << std::endl;
+  }
 
 
   return 0;
