@@ -31,6 +31,14 @@ BOOST_AUTO_TEST_CASE(matrix_default_value_test)
    BOOST_CHECK(a == -5);
 }
 
+BOOST_AUTO_TEST_CASE(matrix_type_test)
+{
+    Matrix<long long, std::numeric_limits<long long>::max() - 10> matrix;
+    auto a = matrix[0][0];  
+    BOOST_CHECK(matrix.size() == 0); 
+    BOOST_CHECK(a == std::numeric_limits<long long>::max() - 10);
+}
+
 BOOST_AUTO_TEST_CASE(matrix_fill_test)
 {
   Matrix<int, -1> matrix;
