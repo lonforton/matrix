@@ -9,12 +9,10 @@ public:
   {
     _matrix_map[_current_indexes] = value;
 
-    if(_matrix_map.at(_current_indexes) == default_value)
+    if (_matrix_map.at(_current_indexes) == default_value)
     {
       _matrix_map.erase(_current_indexes);
     }
-
-    current_it = _matrix_map.begin();
   }
 
   bool operator==(const T &value)
@@ -24,7 +22,7 @@ public:
 
   bool operator!=(const ElementHandler<T, default_value> &rhs)
   {
-    if(this->current_position != rhs.current_position)
+    if (this->current_position != rhs.current_position)
     {
       this->current_position = 0;
       return true;
@@ -38,9 +36,9 @@ public:
     _current_indexes = std::make_pair(row_index, column_index);
   }
 
-  T getValue() 
+  T getValue()
   {
-    if(_matrix_map.find(_current_indexes) == _matrix_map.end())  
+    if (_matrix_map.find(_current_indexes) == _matrix_map.end())
       return _default_value;
 
     return _matrix_map.at(_current_indexes);
@@ -51,44 +49,26 @@ public:
     return _matrix_map.size();
   }
 
-  void goNextElem()
+  auto begin()
   {
-    ++current_it;
-    ++current_position;
+    return _matrix_map.begin();
   }
 
-  void goEndState()
+  auto end()
   {
-    current_position = _matrix_map.size();
+    return _matrix_map.end();
   }
 
-  std::tuple<T, T, T> getIndexesValueTuple()
-  {
-    return std::make_tuple(current_it->first.first, current_it->first.second, current_it->second);
-  }
-
-  void update()
-  {
-    first = current_it->first;
-    second = current_it->second;
-  }
-
-    std::pair<int, int> first;
-    T second;
-
-  private:
-    std::map<std::pair<int, int>, T> _matrix_map;
-    std::pair<int, int> _current_indexes;
-    int _default_value = default_value;
-    typename std::map<std::pair<int, int>, T>::iterator current_it;
-    int current_position = 0;
+private:
+  std::map<std::pair<int, int>, T> _matrix_map;
+  std::pair<int, int> _current_indexes;
+  T _default_value = default_value;
 };
 
 template <typename T, T default_value>
 class RowsHandler
 {
-  public:
-
+public:
   ElementHandler<T, default_value> &operator[](int column_index)
   {
     _column_index = column_index;
@@ -111,31 +91,20 @@ class RowsHandler
     return _element_handler.getValue();
   }
 
-  std::tuple<T, T, T> getIndexesValueTuple()
+  auto begin()
   {
-    return _element_handler.getIndexesValueTuple();
+    return _element_handler.begin();
   }
 
-   ElementHandler<T, default_value> getPairValue() 
+  auto end()
   {
-    _element_handler.update();
-    return _element_handler;
+    return _element_handler.end();
   }
 
-  void goNextElem()
-  {
-    return _element_handler.goNextElem();
-  }
-
-  void goEndState()
-  {
-    _element_handler.goEndState();
-  }
-
-  private:
-    ElementHandler<T, default_value> _element_handler;
-    int _column_index;
-    int _row_index;
+private:
+  ElementHandler<T, default_value> _element_handler;
+  int _column_index;
+  int _row_index;
 };
 
 template <typename T, T default_value>
@@ -144,7 +113,7 @@ class Matrix
 public:
   RowsHandler<T, default_value> &operator[](int row_index)
   {
-    _rows_handler.setCurrentRow(row_index);    
+    _rows_handler.setCurrentRow(row_index);
     return _rows_handler;
   }
 
@@ -158,38 +127,25 @@ public:
   public:
     using self_type = iterator;
     using value_type = std::tuple<T, T, T>;
-    using reference = std::pair<std::pair<int, int>, T>&;
-    using pointer = std::pair<std::pair<int, int>, T>*;
-    using iterator_category = std::forward_iterator_tag;
 
-    iterator(RowsHandler<T, default_value>* rows_it_handler) : _rows_it_handler(rows_it_handler){};
- 
-    iterator &operator++() {  _rows_it_handler->goNextElem(); return *this;}
-    self_type operator++(__attribute__((unused)) int junk) { self_type i = *this;  _rows_it_handler->goNextElem(); return i; }
-    value_type operator*() { return _rows_it_handler->getIndexesValueTuple(); }
-    bool operator!=(const self_type& rhs) { 
-      return _rows_it_handler->getPairValue() != rhs.getRowsHandler()->getPairValue();
-    }
+    iterator(typename std::map<std::pair<int, int>, T>::iterator it) : _it(it) {}
 
-    RowsHandler<T, default_value>* getRowsHandler() const
-    {
-      return _rows_it_handler;
-    }
+    iterator &operator++() { ++_it;  return *this;  }
+    value_type operator*() { return std::make_tuple(_it->first.first, _it->first.second, _it->second); }
+    bool operator!=(const self_type &rhs) { return _it != rhs._it; }
 
-    private:
-      RowsHandler<T, default_value> *_rows_it_handler;
+  private:
+    typename std::map<std::pair<int, int>, T>::iterator _it;
   };
 
   iterator begin()
   {
-    return iterator(&_rows_handler);
+    return iterator(_rows_handler.begin());
   }
 
   iterator end()
   {
-    RowsHandler<T, default_value>* rows_handler = new RowsHandler<T, default_value>(_rows_handler);
-    rows_handler->goEndState();
-    return iterator(rows_handler);
+    return iterator(_rows_handler.end());
   }
 
 private:
@@ -203,4 +159,3 @@ std::ostream &operator<<(std::ostream &out, ElementHandler<T, default_value> &el
   out << element_handler.getValue();
   return out;
 }
-
