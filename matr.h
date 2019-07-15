@@ -7,62 +7,54 @@ class ElementHandler
 public:
   void operator=(const T &value)
   {
-    _matrix_map[_current_indexes] = value;
-
-    if (_matrix_map.at(_current_indexes) == default_value)
+    if (value == default_value)
     {
-      _matrix_map.erase(_current_indexes);
+      _matrix_map.erase(_current_indexes);      
+    }
+    else
+    {
+      _matrix_map[_current_indexes] = value;
     }
   }
 
   bool operator==(const T &value)
   {
     return this->getValue() == value;
-  }
-
-  bool operator!=(const ElementHandler<T, default_value> &rhs)
-  {
-    if (this->current_position != rhs.current_position)
-    {
-      this->current_position = 0;
-      return true;
     }
 
-    return false;
-  }
+    void setCurrentIndexes(int row_index, int column_index)
+    {
+      _current_indexes = std::make_pair(row_index, column_index);
+    }
 
-  void setCurrentIndexes(int row_index, int column_index)
-  {
-    _current_indexes = std::make_pair(row_index, column_index);
-  }
+    T getValue()
+    {
+      auto elem_iterator = _matrix_map.find(_current_indexes);
+      if (elem_iterator != _matrix_map.end())
+        return (*elem_iterator).second;
 
-  T getValue()
-  {
-    if (_matrix_map.find(_current_indexes) == _matrix_map.end())
-      return _default_value;
+      return default_value;
+    }
 
-    return _matrix_map.at(_current_indexes);
-  }
+    int size() const
+    {
+      return _matrix_map.size();
+    }
 
-  int size() const
-  {
-    return _matrix_map.size();
-  }
+    auto begin()
+    {
+      return _matrix_map.begin();
+    }
 
-  auto begin()
-  {
-    return _matrix_map.begin();
-  }
+    auto end()
+    {
+      return _matrix_map.end();
+    }
 
-  auto end()
-  {
-    return _matrix_map.end();
-  }
-
-private:
-  std::map<std::pair<int, int>, T> _matrix_map;
-  std::pair<int, int> _current_indexes;
-  T _default_value = default_value;
+  private:
+    std::map<std::pair<int, int>, T> _matrix_map;
+    std::pair<int, int> _current_indexes;
+    T _default_value = default_value;
 };
 
 template <typename T, T default_value>
@@ -72,7 +64,7 @@ public:
   ElementHandler<T, default_value> &operator[](int column_index)
   {
     _column_index = column_index;
-    _element_handler.setCurrentIndexes(_column_index, _row_index);
+    _element_handler.setCurrentIndexes(_row_index, _column_index);
     return _element_handler;
   }
 
@@ -126,7 +118,7 @@ public:
   {
   public:
     using self_type = iterator;
-    using value_type = std::tuple<T, T, T>;
+    using value_type = std::tuple<int, int, T>;
 
     iterator(typename std::map<std::pair<int, int>, T>::iterator it) : _it(it) {}
 
@@ -150,7 +142,6 @@ public:
 
 private:
   RowsHandler<T, default_value> _rows_handler;
-  int _column_index;
 };
 
 template <typename T, T default_value>
